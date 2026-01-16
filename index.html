@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speed Reader</title>
+    <title>WPM — Word Per Min Reader</title>
     <style>
         :root {
             --bg-color: #000;
@@ -68,12 +68,14 @@
             gap: 15px;
         }
 
-        #theme-btn {
+        .left-group {
+            display: flex;
+            gap: 10px;
             margin-right: auto;
         }
 
         input[type=range] {
-            width: 120px;
+            width: 100px;
             accent-color: var(--text-color);
             cursor: pointer;
         }
@@ -84,10 +86,10 @@
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 5px 10px;
-            width: 50px;
+            width: 45px;
             text-align: center;
             font-family: inherit;
-            font-size: 16px;
+            font-size: 14px;
             outline: none;
         }
 
@@ -103,6 +105,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 0;
+            padding: 0;
             transition: background 0.2s, border-color 0.3s;
         }
 
@@ -110,11 +114,7 @@
             background: rgba(128, 128, 128, 0.2);
         }
 
-        #play-btn {
-            padding-left: 0; 
-        }
-
-        #input-panel {
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -122,7 +122,7 @@
             height: 100vh;
             background: var(--panel-bg);
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(5px);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -130,16 +130,18 @@
             z-index: 10;
         }
 
-        #text-area-wrapper {
+        .modal-content {
             width: 90%;
-            height: 30%;
-            position: relative; 
+            max-width: 340px;
+            position: relative;
             display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         textarea {
             width: 100%;
-            height: 100%;
+            height: 200px;
             background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-color);
@@ -151,11 +153,41 @@
             box-sizing: border-box;
         }
 
-        #save-btn {
-            position: absolute;
-            bottom: -50px;
-            border-radius: 5px;
-            right: 0;
+        #font-panel .modal-content {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .toggle-btn {
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .toggle-btn.active {
+            background: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .save-btn-ui {
+            align-self: flex-end;
             background: transparent;
             color: var(--text-color);
             border: 1px solid var(--border-color);
@@ -163,11 +195,7 @@
             font-family: inherit;
             font-size: 18px;
             cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        #save-btn:hover {
-            background: rgba(128, 128, 128, 0.2);
+            border-radius: 5px;
         }
 
         input[type="number"]::-webkit-inner-spin-button, 
@@ -183,31 +211,63 @@
         <div id="word-frame"></div>
         
         <div id="controls">
-            <button id="theme-btn" class="control-btn">㊊</button>
+            <div class="left-group">
+                <button id="theme-btn" class="control-btn">㊊</button>
+                <button id="font-btn" class="control-btn">f</button>
+            </div>
             <input type="range" id="wpm-slider" min="100" max="1000" step="100" value="100">
             <input type="number" id="wpm-display" value="100" min="100" max="1000">
-            <button id="reset-btn" class="control-btn">㊀</button>
-            <button id="play-btn" class="control-btn">⦿</button>
+            <button id="reset-btn" class="control-btn">⬤</button>
+            <button id="play-btn" class="control-btn">▶</button>
         </div>
     </div>
 
-    <div id="input-panel">
-        <div id="text-area-wrapper">
+    <div id="input-panel" class="modal-overlay">
+        <div class="modal-content" id="input-content">
             <textarea id="text-input" placeholder="Your text here..."></textarea>
-            <button id="save-btn">Save</button>
+            <button id="save-text-btn" class="save-btn-ui">Save</button>
+        </div>
+    </div>
+
+    <div id="font-panel" class="modal-overlay">
+        <div class="modal-content" id="font-content">
+            <div class="setting-row">
+                <label>Size</label>
+                <input type="number" id="font-size-input" value="48" style="width: 50px; background:transparent; color:inherit; border:1px solid var(--border-color); padding:5px; border-radius:5px;">
+            </div>
+            <div class="setting-row">
+                <label>Color</label>
+                <input type="color" id="font-color-input" value="#ffffff">
+            </div>
+            <div class="setting-row">
+                <label>Style</label>
+                <div class="toggle-group">
+                    <button class="toggle-btn" id="bold-btn">B</button>
+                    <button class="toggle-btn" id="italic-btn">I</button>
+                    <button class="toggle-btn" id="under-btn">U</button>
+                </div>
+            </div>
+            <button id="save-font-btn" class="save-btn-ui">Save</button>
         </div>
     </div>
 
     <script>
         const wordFrame = document.getElementById('word-frame');
         const inputPanel = document.getElementById('input-panel');
+        const fontPanel = document.getElementById('font-panel');
         const textInput = document.getElementById('text-input');
-        const saveBtn = document.getElementById('save-btn');
         const playBtn = document.getElementById('play-btn');
         const resetBtn = document.getElementById('reset-btn');
         const themeBtn = document.getElementById('theme-btn');
+        const fontBtn = document.getElementById('font-btn');
         const wpmSlider = document.getElementById('wpm-slider');
         const wpmDisplay = document.getElementById('wpm-display');
+
+        const fontSizeInput = document.getElementById('font-size-input');
+        const fontColorInput = document.getElementById('font-color-input');
+        const boldBtn = document.getElementById('bold-btn');
+        const italicBtn = document.getElementById('italic-btn');
+        const underBtn = document.getElementById('under-btn');
 
         let words = [];
         let currentIndex = 0;
@@ -216,6 +276,7 @@
 
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
             document.documentElement.setAttribute('data-theme', 'light');
+            fontColorInput.value = "#000000";
         }
 
         themeBtn.addEventListener('click', () => {
@@ -227,6 +288,10 @@
             }
         });
 
+        fontBtn.addEventListener('click', () => {
+            if (!isPlaying) fontPanel.style.display = 'flex';
+        });
+
         wordFrame.addEventListener('click', () => {
             if (!isPlaying) {
                 inputPanel.style.display = 'flex';
@@ -234,79 +299,79 @@
             }
         });
 
-        saveBtn.addEventListener('click', () => {
+        function saveTextData() {
             const rawText = textInput.value.trim();
             if (rawText) {
                 words = rawText.split(/\s+/);
                 currentIndex = 0;
                 wordFrame.textContent = words[0];
-                inputPanel.style.display = 'none';
-            } else {
-                inputPanel.style.display = 'none';
             }
+            inputPanel.style.display = 'none';
+        }
+
+        function saveFontSettings() {
+            wordFrame.style.fontSize = fontSizeInput.value + 'px';
+            wordFrame.style.color = fontColorInput.value;
+            wordFrame.style.fontWeight = boldBtn.classList.contains('active') ? 'bold' : 'normal';
+            wordFrame.style.fontStyle = italicBtn.classList.contains('active') ? 'italic' : 'normal';
+            wordFrame.style.textDecoration = underBtn.classList.contains('active') ? 'underline' : 'none';
+            fontPanel.style.display = 'none';
+        }
+
+        [boldBtn, italicBtn, underBtn].forEach(btn => {
+            btn.addEventListener('click', () => btn.classList.toggle('active'));
+        });
+
+        document.getElementById('save-text-btn').addEventListener('click', saveTextData);
+        document.getElementById('save-font-btn').addEventListener('click', saveFontSettings);
+
+        window.addEventListener('click', (e) => {
+            if (e.target === inputPanel) saveTextData();
+            if (e.target === fontPanel) saveFontSettings();
         });
 
         wpmSlider.addEventListener('input', (e) => {
             wpmDisplay.value = e.target.value;
-            if (isPlaying) {
-                stopReader();
-                startReader();
-            }
+            if (isPlaying) { stopReader(); startReader(); }
         });
 
         wpmDisplay.addEventListener('change', (e) => {
-            let val = parseInt(e.target.value);
-            if (val < 100) val = 100;
-            if (val > 1000) val = 1000;
+            let val = Math.min(Math.max(parseInt(e.target.value) || 100, 100), 1000);
             wpmDisplay.value = val;
             wpmSlider.value = val;
-            if (isPlaying) {
-                stopReader();
-                startReader();
-            }
+            if (isPlaying) { stopReader(); startReader(); }
         });
 
         resetBtn.addEventListener('click', () => {
             stopReader();
             currentIndex = 0;
-            if (words.length > 0) {
-                wordFrame.textContent = words[0];
-            }
+            if (words.length > 0) wordFrame.textContent = words[0];
         });
 
         playBtn.addEventListener('click', () => {
             if (words.length === 0) return;
-
-            if (isPlaying) {
-                stopReader();
-            } else {
-                if (currentIndex >= words.length) {
-                    currentIndex = 0;
-                }
+            if (isPlaying) stopReader();
+            else {
+                if (currentIndex >= words.length) currentIndex = 0;
                 startReader();
             }
         });
 
         function startReader() {
             isPlaying = true;
-            const wpm = parseInt(wpmSlider.value);
-            const delay = 60000 / wpm;
-
+            playBtn.textContent = "||";
+            const delay = 60000 / parseInt(wpmSlider.value);
             wordFrame.textContent = words[currentIndex];
-            
             intervalId = setInterval(() => {
                 currentIndex++;
-                if (currentIndex < words.length) {
-                    wordFrame.textContent = words[currentIndex];
-                } else {
-                    stopReader();
-                    currentIndex = 0; 
-                }
+                if (currentIndex < words.length) wordFrame.textContent = words[currentIndex];
+                else { stopReader(); currentIndex = 0; }
             }, delay);
         }
 
         function stopReader() {
             isPlaying = false;
+            playBtn.textContent = "▶";
             clearInterval(intervalId);
         }
     </script>
