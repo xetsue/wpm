@@ -1,2 +1,2 @@
 # wpm
-Word Per Minute Display Player
+Word Per Minute Reader / Player
